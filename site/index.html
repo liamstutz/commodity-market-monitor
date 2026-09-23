@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commodity Market Monitor</title>
+<meta name="description" content="Live US energy market dashboard with a public, auto-graded track record of market calls.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Commodity Market Monitor <span>/ Energy</span></h1>
+      <!-- EDIT: put your name and links here -->
+      <p class="sub">Live US crude &amp; refined products dashboard with a public, auto-graded record of my market calls. By Liam · <a href="https://github.com/liamstutz/commodity-market-monitor">source on GitHub</a>.</p>
+    </div>
+    <div class="stamp mono" id="stamp"></div>
+  </header>
+
+  <div class="record" id="record"></div>
+
+  <h2>Market snapshot</h2>
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Charts</h2>
+  <div class="grid">
+    <div class="card"><h3>3-2-1 crack spread</h3><p>Gross refining margin, NY Harbor, $/bbl of crude</p><div class="chart"><canvas id="c_crack"></canvas></div></div>
+    <div class="card"><h3>WTI vs Brent</h3><p>Spot prices and the WTI–Brent spread, $/bbl</p><div class="chart"><canvas id="c_wti"></canvas></div></div>
+    <div class="card"><h3>US crude inventories vs 5-year range</h3><p>Commercial stocks ex-SPR, million bbl, by week of year</p><div class="chart"><canvas id="c_stocks"></canvas></div></div>
+    <div class="card"><h3>Speculative positioning</h3><p>Managed money net long, NYMEX WTI (CFTC), contracts</p><div class="chart"><canvas id="c_cot"></canvas></div></div>
+  </div>
+
+  <h2>Call log</h2>
+  <div class="tablewrap" id="calls"></div>
+
+  <h2>Market notes</h2>
+  <div id="notes"></div>
+
+  <footer>
+    Data: U.S. Energy Information Administration (spot prices, weekly petroleum status), CFTC Commitments of Traders.
+    Updated automatically each weekday by GitHub Actions. Calls are timestamped by their first git commit and scored
+    against the last observation before the call and the first observation on or after the resolve date.
+  </footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
