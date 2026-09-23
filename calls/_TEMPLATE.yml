@@ -1,0 +1,14 @@
+# Copy this file to calls/YYYY-MM-DD-short-name.yml, fill it in, and commit.
+# Files starting with "_" are ignored. Don't edit a call after committing it:
+# the grader uses the date the file was FIRST committed, so backdating doesn't work.
+
+made: 2026-09-22          # today
+metric: crude_stocks      # wti | brent | wti_brent | crack_321 | crude_stocks | mm_net
+direction: down           # up | down
+resolve_on: 2026-09-30    # graded on the first data point on/after this date
+min_move: 0               # optional: minimum move (in the metric's units) to count as a hit
+
+thesis: >
+  Why you think this happens, in 2-4 sentences. Name the driver
+  (e.g. refinery runs, exports, hurricane, OPEC+ decision), what the
+  market expects, and what would prove you wrong.
