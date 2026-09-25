@@ -1,0 +1,13 @@
+made: 2026-09-24
+metric: wti_brent
+direction: up
+resolve_on: 2026-10-09
+min_move: 1.0
+
+thesis: >
+  The WTI-Brent spot spread (about -$24) is at a 1-year extreme and far wider
+  than futures (about -$13). That gap makes exporting US crude very profitable,
+  which should tighten US supply and lift WTI relative to Brent. Reports of
+  phased US-Iran talks to reopen Hormuz add downside risk to Brent's war
+  premium. I'm wrong if Houthi strikes on Yanbu disrupt Saudi's Hormuz
+  bypass or Hormuz transits stay well below normal, keeping Brent bid.
