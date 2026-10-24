@@ -89,6 +89,13 @@ def main() -> None:
     if SITE.exists():
         shutil.rmtree(SITE)
     shutil.copytree(ROOT / "site", SITE)
+    # Keep each deployment's scripts and data together despite browser/CDN caches.
+    version = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%d%H%M%S%f")
+    for filename, asset in (("index.html", "app.js"), ("app.js", "app2.js"), ("app2.js", "data.json")):
+        path = SITE / filename
+        content = path.read_text(encoding="utf-8")
+        content = content.replace(f'"{asset}"', f'"{asset}?v={version}"')
+        path.write_text(content, encoding="utf-8")
     (SITE / "data.json").write_text(json.dumps(payload, separators=(",", ":"), default=str))
     print(f"built _site/  calls={len(calls)} record={hits}/{len(decided)}")
 
