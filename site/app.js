@@ -8,7 +8,7 @@ function renderTop(d) {
   const r = d.record;
   document.getElementById("record").innerHTML = `
     <div><small>Hit rate</small><b>${r.hit_rate == null ? "–" : r.hit_rate + "%"}</b></div>
-    <div><small>Calls graded</small><b>${r.hits}/${r.decided}</b></div>
+    <div><small>Calls graded</small><b>${r.decided}</b></div>
     <div><small>Open calls</small><b>${r.pending}</b></div>`;
 
   document.getElementById("kpis").innerHTML = d.kpis.map(k => {
