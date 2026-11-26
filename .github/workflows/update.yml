@@ -27,11 +27,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+    outputs:
+      fetch_outcome: ${{ steps.fetch.outcome }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -58,10 +59,19 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
       - name: Flag a complete source outage
-        if: steps.fetch.outcome == 'failure'
+        if: needs.update.outputs.fetch_outcome == 'failure'
         run: |
           echo "::error::All sources failed. The dashboard was published with cached data and visible source warnings."
           exit 1
