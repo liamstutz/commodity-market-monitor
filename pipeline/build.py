@@ -9,7 +9,7 @@ from pathlib import Path
 import markdown
 import pandas as pd
 
-from grade import grade_all
+from quant import research
 from metrics import METRICS, load_metrics
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -70,21 +70,12 @@ def load_notes() -> list[dict]:
 
 def main() -> None:
     m = load_metrics()
-    calls = grade_all(m)
-    decided = [c for c in calls if c["status"] in ("hit", "miss")]
-    hits = sum(c["status"] == "hit" for c in decided)
     payload = {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "kpis": [kpi(k, m[k]) for k in METRICS],
         "series": {k: series_json(m[k], dp=METRICS[k][2] + 1) for k in METRICS},
         "stocks_seasonal": stocks_seasonal(m["crude_stocks"]),
-        "calls": calls,
-        "record": {
-            "hits": hits, "decided": len(decided),
-            "pending": sum(c["status"] == "pending" for c in calls),
-            "hit_rate": round(100 * hits / len(decided)) if decided else None,
-        },
-        "notes": load_notes(),
+        "research": research(m),
     }
     if SITE.exists():
         shutil.rmtree(SITE)
@@ -97,7 +88,7 @@ def main() -> None:
         content = content.replace(f'"{asset}"', f'"{asset}?v={version}"')
         path.write_text(content, encoding="utf-8")
     (SITE / "data.json").write_text(json.dumps(payload, separators=(",", ":"), default=str))
-    print(f"built _site/  calls={len(calls)} record={hits}/{len(decided)}")
+    print("built automated research dashboard")
 
 
 if __name__ == "__main__":
