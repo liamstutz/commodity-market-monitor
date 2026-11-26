@@ -50,6 +50,7 @@ class Monitor:
         return self.folder / (symbol.split("=")[0] + ".json")
 
     def refresh(self, now=None):
+        fixed_clock = now is not None
         now = now or dt.datetime.now(UTC)
         with self.lock:
             if self.refreshing:
@@ -61,9 +62,10 @@ class Monitor:
             try:
                 new = self.fetcher(symbol, initial=not state["bars"], now=now)
                 bars = merge_bars(state["bars"], new["bars"])
+                received = now if fixed_clock else dt.datetime.now(UTC)
                 return symbol, {**state, **new, "bars": bars, "status": "connected",
-                                "error": None, "last_success": now.isoformat(), "last_attempt": now.isoformat(),
-                                "watch": update_watch(state["watch"], bars, symbol, now, True)}
+                                "error": None, "last_success": received.isoformat(), "last_attempt": now.isoformat(),
+                                "watch": update_watch(state["watch"], bars, symbol, received, True)}
             except Exception as error:
                 return symbol, {**state, "status": "cached" if state["bars"] else "error",
                                 "last_attempt": now.isoformat(), "error": str(error)[:240],

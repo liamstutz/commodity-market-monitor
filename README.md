@@ -58,7 +58,7 @@ The standalone companion needs only Python's standard library plus time-zone dat
 ### Collection and privacy
 
 - Initial fetch: about one month of available five-minute candles; subsequent requests cover five days and merge into a local archive capped at 30,000 bars per commodity.
-- Completed bar-start timestamps only, with a ten-second completion buffer. Null rows and live quote placeholders are excluded; wrong symbols, bad OHLC ranges, duplicates, non-finite values and regressing histories are rejected.
+- Completed bar-start timestamps only, with a ten-second completion buffer. Null rows, zero-volume candles and live quote placeholders are excluded; wrong symbols, bad OHLC ranges, duplicates, non-finite values and regressing histories are rejected.
 - Closed observations are first-write preserved. Last fetch, latest bar end, age, unknown quote delay and failures are displayed separately. Failures retain cached data and retry on the next cycle.
 - Yahoo is an unofficial, best-effort source and may rate-limit, change or fail. Rolling symbols do not provide audited historical contract identity. Data gaps, contract changes and quote delays limit the conclusions.
 - Personal quotes, forward watches and logs stay in **.private/**, excluded from Git and never read by the public build. The server binds only to 127.0.0.1, serves a fixed file allowlist, rejects foreign hosts/origins and provides no CORS access.

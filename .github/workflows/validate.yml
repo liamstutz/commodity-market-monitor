@@ -36,6 +36,9 @@ jobs:
         id: fetch
         continue-on-error: true
         run: python pipeline/fetch.py
+      - name: Probe free intraday adapters without publishing quotes
+        continue-on-error: true
+        run: python pipeline/intraday_server.py --once --data-dir "$RUNNER_TEMP/private-intraday-probe"
       - name: Build preview without recording forecasts
         run: python pipeline/build.py
       - name: Install browser test tools

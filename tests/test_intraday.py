@@ -47,6 +47,12 @@ class IntradayTests(unittest.TestCase):
         self.assertEqual(valid[0][4],-4)
         self.assertEqual(skipped,1)
 
+    def test_zero_volume_is_a_gap(self):
+        data=bars();data[8][5]=0
+        valid,skipped=normalize(data,NOW)
+        self.assertEqual(skipped,1)
+        self.assertFalse(candidates(valid))
+
     def test_provider_identity_and_lengths(self):
         self.assertEqual(len(parse_yahoo(payload(),"CL=F",NOW)["bars"]),40)
         bad=payload();bad["chart"]["result"][0]["meta"]["instrumentType"]="EQUITY"

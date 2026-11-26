@@ -49,6 +49,9 @@ def normalize(rows, now=None):
             raise ValueError("Non-finite OHLCV")
         if high < max(opening, close, low) or low > min(opening, close, high) or volume < 0:
             raise ValueError("Invalid OHLC range or volume")
+        if volume == 0:
+            skipped += 1
+            continue
         valid.append([int(stamp), *[float(v) for v in row[1:]]])
     return sorted(valid), skipped
 
