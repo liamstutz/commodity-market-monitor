@@ -31,6 +31,7 @@ jobs:
         run: |
           node --check site/app.js
           node --check site/app2.js
+          node --check site/intraday.js
       - name: Exercise public data adapters
         id: fetch
         continue-on-error: true
@@ -42,7 +43,9 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.56.1
           npx playwright install --with-deps chromium
       - name: Test dashboard in real Chromium
-        run: node tests/browser.cjs
+        run: |
+          node tests/browser.cjs
+          node tests/intraday-browser.cjs
       - name: Upload review preview and browser evidence
         if: always()
         uses: actions/upload-artifact@v4

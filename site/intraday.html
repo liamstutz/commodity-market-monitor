@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101217">
+<title>Commodity Market Monitor · Intraday Lab</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="intraday.css">
+<script src="app2.js" defer></script>
+<script src="intraday.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#lab">Skip to intraday research</a>
+<main class="lab-main" id="lab">
+<header class="topbar"><a class="brand" href="https://liamstutz.github.io/commodity-market-monitor/">C<span>/</span>M</a><span class="breadcrumb">COMMODITIES / INTRADAY LAB</span><span class="tag" id="connection">PRIVATE RESEARCH</span></header>
+<section class="heading"><div><div class="eyebrow">FIVE-MINUTE RESEARCH · $0 DATA CONNECTION</div><h1>Test the rule.<br>Keep the evidence<span>.</span></h1><p>WTI crude, natural gas and gold. Automatic local collection, explicit costs and a record of what was actually observed.</p></div><div class="stamp"><span>PERSONAL RESEARCH</span><time id="lab-stamp">Waiting for a connection</time><small>Quote delay varies. Bar times and fetch times are separate.</small></div></section>
+<div class="status-banner" id="lab-status" role="status">Checking the research companion.</div>
+<section class="card setup" id="setup" hidden>
+<div class="eyebrow">START THE FREE COMPANION</div><h2>Your data stays on your computer</h2>
+<p>The public monitor continues its daily updates. The intraday collector runs privately while your computer is awake, with a new check every five minutes. No account, API key, subscription or cloud server is needed.</p>
+<ol><li>Get the <a href="https://github.com/liamstutz/commodity-market-monitor">project from GitHub</a>.</li><li>On Windows, right-click <code>Start-Intraday.ps1</code> and choose Run with PowerShell. Or use Python 3.10+:</li></ol>
+<pre><code>python -m pip install tzdata
+python pipeline/intraday_server.py</code></pre>
+<p><a class="button" href="http://127.0.0.1:8766/">Open the running companion</a></p>
+<p class="subtle">This page does not contact your computer automatically. Alternatively, reopen an exported research report below; the file is read only in this browser.</p>
+</section>
+<div class="lab-actions"><label class="button file-label">Open saved report<input type="file" id="report-file" accept=".json,application/json"></label><button id="lab-export" type="button" disabled>Export research report</button><button id="lab-reconnect" type="button" hidden>Reconnect</button><button id="lab-stop" type="button" hidden>Stop local collector</button></div>
+<form id="research-form" class="research-controls" hidden>
+<label>Commodity<select name="symbol" id="symbol"><option value="CL=F">WTI crude · CL</option><option value="NG=F">Natural gas · NG</option><option value="GC=F">Gold · GC</option></select></label>
+<label>Anchor · New York<input name="anchor" id="anchor" type="time" step="300" value="09:30" required></label>
+<label>Hold after entry<select name="holding" id="holding"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60" selected>60 minutes</option><option value="120">120 minutes</option></select></label>
+<label>Slippage · ticks per side<input name="slippage" id="slippage" type="number" min="0" max="20" step=".5" value="1" required></label>
+<label>Round-trip fees · $<input name="fee" id="fee" type="number" min="0" max="100" step=".5" value="5" required></label>
+<button type="submit">Apply assumptions</button>
+</form>
+<div id="research" hidden>
+<p class="section-intro" id="assumptions"></p>
+<section><div class="section-head"><div><div class="eyebrow">01 / CURRENT OBSERVATIONS</div><h2 id="instrument-heading">Five-minute prices</h2></div><span id="price-age" class="pill"></span></div>
+<div class="chart-grid"><article class="card"><h3>Latest completed candles & 12-period EMA</h3><p class="subtle">Axis: New York time. Readout: UTC. Up to 288 recent bars.</p><div class="chart" id="intraday-price"></div></article><article class="card"><h3>Cumulative hypothetical P&amp;L</h3><p class="subtle">One full-size contract per session. Costs deducted from both rules.</p><div class="chart" id="intraday-equity"></div></article></div></section>
+<section><div class="section-head"><div><div class="eyebrow">02 / HISTORICAL REPLAY</div><h2>Costs change the result</h2></div><span class="tag">SIMULATION · NOT LIVE RETURNS</span></div>
+<div id="lab-stats" class="record"></div>
+<p class="section-intro" id="sample-note"></p>
+<div class="tablewrap"><table><thead><tr><th>Sample</th><th>Trades</th><th>Net P&amp;L</th><th>Always-buy net</th><th>Net win rate</th><th>Closed-trade drawdown</th></tr></thead><tbody id="split-rows"></tbody></table></div>
+<details class="method"><summary>Rule, costs and limits</summary><p>The 12-period EMA uses completed five-minute closes and resets after missing candles and each New York calendar day. At least twelve consecutive bars are required. A close above the EMA at the selected anchor chooses long; below chooses short; an exact tie makes no trade. The next bar's open is the hypothetical entry. Exit uses the open after the chosen holding period. Any missing candle through exit excludes the trade.</p><p>09:30 New York is an experimental anchor, not the exchange open for every commodity. The $5 round-trip fee and one tick of slippage per side are editable assumptions, not a broker quote. Each replay uses one full-size CL, NG or GC contract; it excludes financing, margin, liquidity constraints and actual bid/ask spreads. The always-buy benchmark uses the identical entries, exits and costs.</p><p>The earlier 70% and later 30% split is chronological. The later sample is not independently out of sample if you tune settings after seeing it. Short, overlapping samples do not establish profitability. Drawdown uses closed trades only, so it understates possible intratrade losses.</p><p id="lab-limitation"></p></details>
+<details class="method"><summary>Inspect every simulated trade</summary><div class="tablewrap"><table><thead><tr><th>Date</th><th>Direction</th><th>Entry · UTC</th><th>Entry price</th><th>Exit price</th><th>Gross $</th><th>Costs $</th><th>Net $</th></tr></thead><tbody id="trade-rows"></tbody></table></div></details></section>
+<section><div class="section-head"><div><div class="eyebrow">03 / OBSERVED AFTER STARTUP</div><h2>A separate forward watch</h2></div><span class="tag">FIXED 09:30 ANCHOR</span></div>
+<p class="section-intro">Only signals received within 30 minutes of the completed 09:30 New York candle are saved here. The baseline is the latest completed close actually available at observation time. The target is one hour after observation, not one hour after the historical signal. This is a directional watch, not simulated fills or P&amp;L. It does not change when you edit replay settings.</p>
+<div class="tablewrap"><table><thead><tr><th>Observed · UTC</th><th>Direction</th><th>Known baseline</th><th>Due · UTC</th><th>Outcome</th></tr></thead><tbody id="watch-rows"></tbody></table></div>
+<p class="subtle">The first available close on or after the target is used, with a maximum 30-minute tolerance. Missing outcomes become unscored. Flat moves count as misses. First-issued values and resolved outcomes are kept.</p></section>
+<section><div class="section-head"><div><div class="eyebrow">04 / PRIVATE DATA HEALTH</div><h2>Fetched does not mean fresh</h2></div></div>
+<div class="tablewrap"><table><thead><tr><th>Commodity</th><th>Collection</th><th>Closed bars</th><th>Latest bar end · UTC</th><th>Age · minutes</th><th>Last fetch · UTC</th></tr></thead><tbody id="lab-sources"></tbody></table></div></section>
+</div>
+<footer><div><strong>Commodity Market Monitor</strong><span>Built by Liam Stutz · Private intraday research</span></div><p>Yahoo Finance is an unofficial, best-effort source for personal research. Keep downloaded observations and reports private. They are excluded from the public dashboard build. Futures specifications: <a href="https://www.cmegroup.com/education/courses/event-contracts-underlying-markets/wti-overview.html">CL</a>, <a href="https://www.cmegroup.com/education/courses/introduction-to-natural-gas/nat-gas-product-overview">NG</a>, <a href="https://www.cmegroup.com/markets/metals/precious/gold/specs">GC</a>.</p></footer>
+</main>
+</body></html>

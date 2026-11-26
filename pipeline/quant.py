@@ -99,8 +99,8 @@ def research(metrics: dict, now: dt.datetime | None = None) -> dict:
         "version": MODEL_VERSION,
         "signals": {key: evaluate(metrics[key], now) for key in SIGNAL_KEYS},
         "intraday": {
-            "status": "unavailable",
-            "reason": "Five-minute commodity contract data is not connected. No intraday signals or performance are being generated.",
+            "status": "private_companion",
+            "reason": "The free private companion collects five-minute WTI, natural gas and gold observations on your computer. Open the intraday lab for cost-adjusted replay and a separate forward watch. Intraday quotes are not published on this public page.",
             "rule": "Experimental 12-period EMA on five-minute bars; configurable 09:30 America/New_York anchor, then next-bar open. This anchor is not a universal commodity exchange open.",
         },
     }
