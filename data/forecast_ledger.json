@@ -1,0 +1,68 @@
+[
+  {
+    "id": "spot-reversion-20-v2:wti:2026-11-24",
+    "version": "spot-reversion-20-v2",
+    "metric": "wti",
+    "issued_at": "2026-11-26T06:12:16.460580+00:00",
+    "as_of": "2026-11-24",
+    "due_on": "2026-12-03",
+    "direction": 1,
+    "start_value": 82.24,
+    "mean": 92.834,
+    "z": -1.4213473615820713,
+    "reason": "The latest value is 1.42 standard deviations below its 20-observation mean. The rule expects a move toward that mean.",
+    "status": "pending",
+    "sources_fetched_at": {
+      "wti": "2026-11-26T06:12:14.620042+00:00",
+      "brent": "2026-11-26T06:12:14.620042+00:00",
+      "gasoline_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "ulsd_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "crude_stocks": "2026-11-26T06:12:14.620042+00:00",
+      "cot_wti": "2026-11-26T06:12:14.620042+00:00"
+    }
+  },
+  {
+    "id": "spot-reversion-20-v2:wti_brent:2026-11-24",
+    "version": "spot-reversion-20-v2",
+    "metric": "wti_brent",
+    "issued_at": "2026-11-26T06:12:16.460580+00:00",
+    "as_of": "2026-11-24",
+    "due_on": "2026-12-03",
+    "direction": 1,
+    "start_value": -9.560000000000002,
+    "mean": -5.6785,
+    "z": -1.001359509246327,
+    "reason": "The latest value is 1.00 standard deviations below its 20-observation mean. The rule expects a move toward that mean.",
+    "status": "pending",
+    "sources_fetched_at": {
+      "wti": "2026-11-26T06:12:14.620042+00:00",
+      "brent": "2026-11-26T06:12:14.620042+00:00",
+      "gasoline_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "ulsd_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "crude_stocks": "2026-11-26T06:12:14.620042+00:00",
+      "cot_wti": "2026-11-26T06:12:14.620042+00:00"
+    }
+  },
+  {
+    "id": "spot-reversion-20-v2:crack_321:2026-11-24",
+    "version": "spot-reversion-20-v2",
+    "metric": "crack_321",
+    "issued_at": "2026-11-26T06:12:16.460580+00:00",
+    "as_of": "2026-11-24",
+    "due_on": "2026-12-03",
+    "direction": 1,
+    "start_value": 33.498000000000026,
+    "mean": 37.745400000000004,
+    "z": -1.0817781688676689,
+    "reason": "The latest value is 1.08 standard deviations below its 20-observation mean. The rule expects a move toward that mean.",
+    "status": "pending",
+    "sources_fetched_at": {
+      "wti": "2026-11-26T06:12:14.620042+00:00",
+      "brent": "2026-11-26T06:12:14.620042+00:00",
+      "gasoline_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "ulsd_nyh": "2026-11-26T06:12:14.620042+00:00",
+      "crude_stocks": "2026-11-26T06:12:14.620042+00:00",
+      "cot_wti": "2026-11-26T06:12:14.620042+00:00"
+    }
+  }
+]
