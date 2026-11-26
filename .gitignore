@@ -1,4 +1,8 @@
 _site/
 __pycache__/
+*.pyc
+*.tmp
+.test-output/
+node_modules/
+.env
 .venv/
-.DS_Store

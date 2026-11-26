@@ -1,0 +1,57 @@
+name: Validate monitor
+
+on:
+  pull_request:
+  push:
+    branches: [quant-platform-v2]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: pip install -r requirements.txt
+      - name: Test signal timing, ingestion and forward journal
+        run: python -m unittest discover -s tests -v
+      - name: Check browser scripts
+        run: |
+          node --check site/app.js
+          node --check site/app2.js
+      - name: Exercise public data adapters
+        id: fetch
+        continue-on-error: true
+        run: python pipeline/fetch.py
+      - name: Build preview without recording forecasts
+        run: python pipeline/build.py
+      - name: Install browser test tools
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test dashboard in real Chromium
+        run: node tests/browser.cjs
+      - name: Upload review preview and browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-preview-and-validation
+          path: |
+            _site/
+            .test-output/
+          include-hidden-files: true
+          retention-days: 14

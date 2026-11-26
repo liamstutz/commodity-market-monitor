@@ -3,45 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Commodity Market Monitor</title>
-<meta name="description" content="Automated commodity quantitative research dashboard.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<meta name="theme-color" content="#101217">
+<meta name="description" content="Automated commodity research: energy prices, physical balances, transparent signals and a forward forecast record.">
+<title>Commodity Market Monitor · Energy</title>
 <link rel="stylesheet" href="style.css">
+<script src="app2.js" defer></script>
+<script src="app.js" defer></script>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Commodity Market Monitor <span>/ Energy</span></h1>
-      <!-- EDIT: put your name and links here -->
-      <p class="sub">Automated energy-market signals and historical research. By Liam · <a href="https://github.com/liamstutz/commodity-market-monitor">source on GitHub</a>.</p>
-    </div>
-    <div class="stamp mono" id="stamp"></div>
-  </header>
-
-  <div class="record" id="record"></div>
-
-  <h2>Market snapshot</h2>
-  <div class="kpis" id="kpis"></div>
-
-  <h2>Charts</h2>
-  <div class="grid">
-    <div class="card"><h3>3-2-1 crack spread</h3><p>Gross refining margin, NY Harbor, $/bbl of crude</p><div class="chart"><canvas id="c_crack"></canvas></div></div>
-    <div class="card"><h3>WTI vs Brent</h3><p>Spot prices and the WTI–Brent spread, $/bbl</p><div class="chart"><canvas id="c_wti"></canvas></div></div>
-    <div class="card"><h3>US crude inventories vs 5-year range</h3><p>Commercial stocks ex-SPR, million bbl, by week of year</p><div class="chart"><canvas id="c_stocks"></canvas></div></div>
-    <div class="card"><h3>Speculative positioning</h3><p>Managed money net long, NYMEX WTI (CFTC), contracts</p><div class="chart"><canvas id="c_cot"></canvas></div></div>
-  </div>
-
-  <h2>Quantitative research</h2>
-  <div id="calls"></div>
-  <footer>
-    Data: U.S. Energy Information Administration (spot prices, weekly petroleum status), CFTC Commitments of Traders.
-    Updated automatically each weekday by GitHub Actions. Historical spot-data diagnostics are not executable futures returns. Manual research is archived in the source repository.
-  </footer>
+<a class="skip" href="#overview">Skip to market overview</a>
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="#overview" aria-label="Commodity Market Monitor home">C<span>/</span>M</a>
+    <div class="rail-label">RESEARCH DESK</div>
+    <nav aria-label="Dashboard">
+      <a href="#overview"><span>01</span> Overview</a>
+      <a href="#signals"><span>02</span> Signals</a>
+      <a href="#journal"><span>03</span> Forward record</a>
+      <a href="#sources"><span>04</span> Data health</a>
+    </nav>
+    <div class="rail-bottom"><span class="scope-dot"></span> COMMODITIES ONLY<br><small>Energy / public data</small><a href="https://github.com/liamstutz/commodity-market-monitor" target="_blank" rel="noopener">View source ↗</a></div>
+  </aside>
+  <main id="overview">
+    <header class="topbar">
+      <div class="breadcrumb">COMMODITY MARKET MONITOR <span>/</span> ENERGY</div>
+      <a href="#sources" class="health-label" id="health-label">Checking data health…</a>
+    </header>
+    <section class="heading">
+      <div><div class="eyebrow">AUTOMATED MARKET RESEARCH</div><h1>Energy market monitor<span>.</span></h1><p>Prices, physical balances and systematic signals. Refreshed each weekday.</p></div>
+      <div class="stamp"><span>LAST BUILD · UTC</span><time id="stamp">Loading…</time><small>Observation dates appear beside each series.</small></div>
+    </section>
+    <div id="error" class="error" role="alert" hidden></div>
+    <div id="status-banner" class="status-banner" role="status" hidden></div>
+    <div id="kpis" class="kpis" aria-label="Latest market observations"><p class="loading">Loading market observations…</p></div>
+    <section class="market-section" aria-labelledby="market-heading">
+      <div class="section-head"><div><div class="eyebrow">01 / MARKET STRUCTURE</div><h2 id="market-heading">The market at a glance</h2></div><div class="range-control" role="group" aria-label="Chart history"><button data-range="3" type="button">3M</button><button data-range="12" type="button" aria-pressed="true">1Y</button><button data-range="36" type="button">3Y</button></div></div>
+      <div class="chart-grid">
+        <article class="card"><div class="card-head"><div><h3>Crude benchmarks</h3><p id="price-subtitle">WTI & Brent spot · $/bbl</p></div><select id="price-view" aria-label="Crude chart metric"><option value="prices">WTI + Brent</option><option value="spread">WTI − Brent</option></select></div><div id="c_wti" class="chart"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Refining margin</h3><p>3-2-1 NY Harbor crack spread · $/bbl</p></div><span class="tag">PHYSICAL</span></div><div id="c_crack" class="chart"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Crude inventories</h3><p>Commercial stocks ex-SPR · million bbl</p></div><span class="tag">SEASONAL</span></div><div id="c_stocks" class="chart"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Speculative positioning</h3><p>WTI managed-money net length · contracts</p></div><span class="tag">CFTC</span></div><div id="c_cot" class="chart"></div></article>
+      </div>
+    </section>
+    <section aria-labelledby="brief-heading"><div class="section-head"><div><div class="eyebrow">GENERATED FROM OBSERVED DATA</div><h2 id="brief-heading">Market brief</h2></div><span class="subtle">Rule-based commentary</span></div><div id="brief" class="brief-grid"></div></section>
+    <section id="signals" aria-labelledby="signals-heading">
+      <div class="section-head"><div><div class="eyebrow">02 / SYSTEMATIC RESEARCH</div><h2 id="signals-heading">Signal board</h2></div><span class="tag">20-OBSERVATION MEAN REVERSION</span></div>
+      <p class="section-intro">A fixed rule looks for prices or spreads more than one standard deviation from their recent mean. Each card shows exactly why it is active, neutral or paused.</p>
+      <div id="signals-grid" class="signals-grid"></div>
+      <details class="method"><summary>Historical diagnostic & model assumptions</summary><p>The historical check uses the signal from two observations earlier to predict the next observed change. It uses revised spot data and does not reconstruct publication times, executable prices, contract rolls or trading costs. The “always up” benchmark uses the same active dates. Flat moves count as misses.</p><div class="tablewrap"><table><thead><tr><th>Series</th><th>Active observations</th><th>Rule accuracy</th><th>Always up</th></tr></thead><tbody id="diagnostics"></tbody></table></div><p>The historical diagnostic has a different horizon from the seven-calendar-day forward record below. These statistics are not investment returns.</p></details>
+    </section>
+    <section id="journal" aria-labelledby="journal-heading">
+      <div class="section-head"><div><div class="eyebrow">03 / FORWARD RECORD</div><h2 id="journal-heading">Every forecast, kept on record</h2></div><button id="export" type="button" class="secondary" disabled>Export journal ↓</button></div>
+      <p class="section-intro">Forecasts are saved when issued and graded automatically against later data. Historical simulations never enter this record.</p>
+      <div id="record" class="record"></div>
+      <div class="tablewrap"><table><thead><tr><th>Issued (UTC)</th><th>Series</th><th>Direction</th><th>Baseline</th><th>Due on</th><th>Outcome</th></tr></thead><tbody id="journal-rows"></tbody></table></div>
+      <details class="method"><summary>How the forward record is scored</summary><p id="forward-method"></p><p id="forward-limit"></p></details>
+    </section>
+    <section id="sources" aria-labelledby="sources-heading">
+      <div class="section-head"><div><div class="eyebrow">04 / PIPELINE STATUS</div><h2 id="sources-heading">Know where the numbers stand</h2></div><span class="subtle">6 public source series</span></div>
+      <p class="section-intro">A successful check can still contain delayed observations. Observation dates and fetch times are shown separately. Daily series pause after seven days; weekly series are marked stale after fourteen.</p>
+      <div class="tablewrap"><table><thead><tr><th>Source</th><th>Provider</th><th>Observation date</th><th>Last successful fetch (UTC)</th><th>Status</th></tr></thead><tbody id="source-rows"></tbody></table></div>
+      <div class="intraday"><span class="tag">INTRADAY · INACTIVE</span><div><h3>Opening-bar EMA experiment</h3><p id="intraday-reason"></p><details><summary>View the experimental rule</summary><p id="intraday-rule"></p></details></div></div>
+    </section>
+    <footer><div><strong>Commodity Market Monitor</strong><span>Built by Liam Stutz · Automated energy research</span></div><p>Sources: <a href="https://www.eia.gov/petroleum/data.php" target="_blank" rel="noopener">EIA</a> & <a href="https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm" target="_blank" rel="noopener">CFTC</a>. Delayed observations, not streaming quotes. Research signals do not place orders or measure tradable returns.</p></footer>
+    <noscript>This dashboard needs JavaScript. The underlying observations are available in the source repository's data folder.</noscript>
+  </main>
 </div>
-
-<script src="app.js"></script>
 </body>
 </html>
