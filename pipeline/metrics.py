@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
@@ -21,9 +22,11 @@ METRICS = {
 def _load(name: str, col: str = "value") -> pd.Series:
     path = DATA / f"{name}.csv"
     if not path.exists():
-        return pd.Series(dtype=float)
+        return pd.Series(dtype=float, index=pd.DatetimeIndex([]))
     df = pd.read_csv(path, parse_dates=["date"])
-    return df.set_index("date")[col].sort_index()
+    s = pd.to_numeric(df.set_index("date")[col], errors="coerce").sort_index()
+    s = s[~s.index.duplicated(keep="last")]
+    return s[np.isfinite(s)]
 
 
 def load_metrics() -> dict[str, pd.Series]:

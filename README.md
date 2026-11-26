@@ -1,71 +1,84 @@
-# Commodity Market Monitor: Energy
+# Commodity Market Monitor
 
-A live US oil market dashboard that updates itself every weekday, plus a **public, auto-graded track record of my market calls**.
+An automated, commodities-only energy research dashboard built by Liam Stutz.
 
-**Live dashboard:** https://liamstutz.github.io/commodity-market-monitor/
+**Dashboard:** https://liamstutz.github.io/commodity-market-monitor/
 
-## What it does
+The scheduled pipeline fetches EIA and CFTC observations, validates them, computes transparent rules, writes a forward forecast journal and publishes the dashboard. No weekly calls or written notes are required.
 
-| | |
-|---|---|
-| **Pulls data automatically** | EIA spot prices (WTI, Brent, NY Harbor gasoline & diesel), EIA weekly crude inventories, and CFTC Commitments of Traders positioning, each weekday via GitHub Actions. |
-| **Computes the numbers a desk watches** | 3-2-1 crack spread (refining margin), WTI–Brent spread, crude stocks vs. the 5-year seasonal range, managed-money net length. Each shows 1-week change and 1-year percentile. |
-| **Grades my calls** | Each week I commit a directional call with a written thesis. The grader scores it against the data once it resolves. |
-| **Can't be backdated** | A call counts from the date it was **first committed to git**, not the date written in the file. The commit history is a public, tamper-evident timestamp. |
+## Coverage
 
-## Why these metrics
+| Input | Derived view |
+| --- | --- |
+| EIA WTI and Brent spot prices | Benchmarks and WTI minus Brent spread |
+| EIA NY Harbor gasoline and diesel | 3-2-1 crack spread per barrel of crude |
+| EIA US commercial crude inventories, ex-SPR | Reported weekly stocks and prior five-year seasonal range |
+| CFTC NYMEX WTI disaggregated futures-only positioning | Managed-money long contracts minus short contracts |
 
-- **3-2-1 crack spread:** 3 barrels of crude → 2 gasoline + 1 diesel. It's a rough gross margin for a refiner and drives crude demand.
-- **WTI–Brent:** the US inland vs. waterborne crude price. It reflects US export economics, Cushing storage, and pipeline flows.
-- **Inventories vs. 5-year range:** the market reacts to *surprises* against seasonal norms, not absolute levels.
-- **Managed money positioning:** crowded speculative length or shortness raises the risk of sharp reversals.
+This release covers energy commodities. Sources are delayed observations, not streaming exchange quotes. The commentary is generated from explicit calculations, without an LLM or paid API.
 
-## How calls are scored
+## Automatic operation
 
-```
-start = last observation strictly BEFORE the call date   (what I knew)
-end   = first observation ON or AFTER resolve_on
-hit   = metric moved in the called direction by at least min_move
-```
+GitHub Actions runs at **22:30 UTC on weekdays**, and after relevant changes to main:
 
-Calls live in `calls/` as small YAML files (see `calls/_TEMPLATE.yml`). Weekly notes live in `notes/`.
+1. Test the signal rules and journal.
+2. Fetch each public source independently with bounded retries.
+3. Reject duplicate dates, non-finite values, future observations, regressing end dates and severe history loss.
+4. Preserve the last valid cache on failure and record source health separately.
+5. Generate four spot-data mean-reversion signals and a factual market brief.
+6. Issue qualifying forecasts and resolve earlier forecasts; commit the journal and source observations.
+7. Publish GitHub Pages.
 
-## Built with
+A complete data outage still publishes a clearly marked cached dashboard, then marks the workflow failed. Partial failures are visible in source health; affected composite forecasts are not issued. Daily data older than seven calendar days pauses new signals. Weekly source data older than fourteen days is marked stale. These thresholds are safeguards, not assertions about official release schedules.
 
-Python (pandas), GitHub Actions (scheduled pipeline), GitHub Pages (hosting), Chart.js. I used AI to help build the pipeline and dashboard code. The calls, theses, and notes are my own.
+## Signals and evaluation
 
----
+The fixed model uses a 20-observation rolling mean and sample standard deviation. A z-score below -1 forecasts a higher value; above +1 forecasts a lower value; otherwise the rule is neutral. Negative crude prices are valid. Spread signals concern the numerical spread: a higher WTI-minus-Brent spread means a less negative value when WTI trades below Brent.
 
-## Setup (one time, ~10 minutes)
+Two evaluations are deliberately separate:
 
-1. **Create the repo.** On github.com, click **New repository** and name it `commodity-market-monitor`. Make it **Public** and don't add a README. Upload this project's files.
-   - The web uploader can skip hidden folders. After uploading, check that `.github/workflows/update.yml` exists. If it doesn't, use **Add file → Create new file**, type `.github/workflows/update.yml` as the name, and paste in the file's contents.
-2. **Turn on Pages.** Go to **Settings → Pages → Build and deployment → Source** and choose **GitHub Actions**.
-3. **Run it.** Go to **Actions → "Update data and publish dashboard" → Run workflow**. After a few minutes the dashboard URL appears in the run summary. Paste it at the top of this README.
-4. **Edit the header.** In `site/index.html`, find the `EDIT` comment and put your name and LinkedIn there.
+- **Historical diagnostic:** the signal from two observations earlier is checked against a one-observation change, using current revised data. The always-up comparison uses the identical active dates. This is not a point-in-time trading backtest.
+- **Forward journal:** only forecasts actually issued during successful same-day refreshes are saved. The target is seven calendar days after issuance. The first observation on or after that date is compared with the baseline known at issue. If that observation is more than another seven days late, the forecast is unscored. Flat moves count as misses.
 
-From then on it runs every weekday by itself.
+The baseline may predate issuance because source data arrives with a delay. Results are directional observations, not executable futures P&L. There are no fills, costs, contract rolls or claims of profitability. Forecasts overlap and are correlated. First-issued values and first-observed outcomes are preserved; reruns do not rewrite them. Local previews cannot create a forward record.
 
-## Weekly routine (~30 minutes)
+## Intraday EMA experiment
 
-1. Read the week's news and the EIA Weekly Petroleum Status Report (Wednesdays).
-2. Copy `calls/_TEMPLATE.yml` to `calls/2026-09-29-crack-widens.yml` (or similar), fill it in, and commit.
-3. Copy `notes/_TEMPLATE.md` to `notes/2026-09-29.md` and write your view. Commit.
-4. The site rebuilds automatically after each commit.
+The existing experimental opening-bar rule is retained and tested in `pipeline/quant.py`: 12-period EMA on five-minute bar-start timestamps, with a configurable 09:30 America/New_York anchor and next-bar-open entry candidate. Timestamps must be timezone aware; gaps, duplicates and invalid prices are rejected or skipped.
 
-Make calls you'd actually defend in an interview. Wrong calls with good reasoning are fine. Explaining what you learned from a miss is a strong interview answer.
+**No five-minute commodity contract feed is connected.** The dashboard therefore marks this module inactive. The default anchor is a research parameter, not a universal commodity exchange opening time. No intraday signals or returns are fabricated.
 
-## Run locally (optional)
+## Run and validate
 
 ```bash
 pip install -r requirements.txt
-python pipeline/fetch.py   # download data into data/
-python pipeline/build.py   # build the site into _site/
-python -m http.server -d _site 8000
+python -m unittest discover -s tests -v
+python pipeline/fetch.py
+python pipeline/build.py
+python -m http.server --directory _site 8000
 ```
 
-## Notes
+The scheduled workflow alone uses `python pipeline/build.py --record` after fetching. Use the ordinary build for previews.
 
-- If one data source is down, the previous cached data is kept and the site still builds.
-- GitHub pauses scheduled workflows in repos with no activity for 60 days. The daily data commits normally prevent that. If it does pause, re-enable it in the Actions tab.
-- Data: [EIA](https://www.eia.gov/petroleum/) and [CFTC COT](https://www.cftc.gov/MarketReports/CommitmentsofTraders/index.htm). Both are free, public, and need no API key.
+For real-browser validation:
+
+```bash
+npm install --no-save --no-package-lock playwright@1.56.1
+npx playwright install chromium
+node tests/browser.cjs
+```
+
+CI tests desktop and mobile rendering, chart controls, keyboard inspection, journal export, failed-request retry, stale-data warnings and resolved outcomes. It uploads screenshots and a complete static preview as a workflow artifact.
+
+## Project layout
+
+- `pipeline/fetch.py`: validated public-data adapters and atomic cache writes
+- `pipeline/sources.py`: source registry, dependencies and health checks
+- `pipeline/quant.py`: daily rules and the inactive intraday experiment
+- `pipeline/ledger.py`: persistent forward forecast record
+- `pipeline/build.py`: strict JSON and static asset build
+- `site/`: responsive dashboard with interactive SVG charts; no external chart or font dependency
+- `data/`: observations, fetch status and automatically created forecast journal
+- `tests/`: deterministic pipeline tests and real Chromium checks
+
+Earlier human-written calls and notes remain in `calls/` and `notes/` for historical context. They are not used by the automated dashboard or included in its forward statistics.
