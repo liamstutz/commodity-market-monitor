@@ -59,3 +59,21 @@ jobs:
             .test-output/
           include-hidden-files: true
           retention-days: 14
+
+  windows-launcher:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install tzdata
+      - name: Start and stop the private collector on Windows
+        shell: pwsh
+        run: |
+          $env:CODEX_PRIMARY_RUNTIME_PYTHON = (Get-Command python).Source
+          & ./Start-Intraday.ps1 -NoBrowser
+          $health = Invoke-RestMethod -Uri http://127.0.0.1:8766/api/health -TimeoutSec 5
+          if ($health.service -ne "commodity-monitor-intraday-v1") { throw "Wrong service" }
+          Invoke-RestMethod -Uri http://127.0.0.1:8766/api/stop -Method Post -ContentType application/json -Body "{}"
