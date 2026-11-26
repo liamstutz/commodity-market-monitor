@@ -5,12 +5,7 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 
 function renderTop(d) {
   document.getElementById("stamp").innerHTML = "Updated<br>" + esc(d.generated);
-  const r = d.record;
-  document.getElementById("record").innerHTML = `
-    <div><small>Hit rate</small><b>${r.hit_rate == null ? "–" : r.hit_rate + "%"}</b></div>
-    <div><small>Calls graded</small><b>${r.decided}</b></div>
-    <div><small>Open calls</small><b>${r.pending}</b></div>`;
-
+  document.getElementById("record").textContent = "Automated commodity research · No live orders";
   document.getElementById("kpis").innerHTML = d.kpis.map(k => {
     if (k.value == null) return `<div class="kpi"><div class="l">${esc(k.label)}</div><div class="v">–</div></div>`;
     const cls = k.chg_1w > 0 ? "up" : k.chg_1w < 0 ? "down" : "";
@@ -24,21 +19,8 @@ function renderTop(d) {
 }
 
 function renderTables(d) {
-  const calls = d.calls;
-  document.getElementById("calls").innerHTML = !calls.length
-    ? '<div class="empty">No calls yet. Add one in <span class="mono">calls/</span>.</div>'
-    : `<table><thead><tr><th>Made</th><th>Metric</th><th>Call</th><th class="thesis">Thesis</th><th>Start → End</th><th>Result</th></tr></thead><tbody>${
-      calls.map(c => `<tr>
-        <td class="mono">${esc(c.made ?? "")}</td>
-        <td>${esc(c.metric)}</td>
-        <td class="mono">${c.direction === "up" ? "▲" : c.direction === "down" ? "▼" : ""} ${esc(c.direction)} by ${esc(c.resolve_on ?? "")}</td>
-        <td class="thesis">${esc(c.thesis)}${c.note ? `<br><small style="color:var(--muted)">${esc(c.note)}</small>` : ""}</td>
-        <td class="mono">${c.start != null ? fmt(c.start) : "–"} → ${c.end != null ? fmt(c.end) : "…"}</td>
-        <td><span class="pill ${c.status}">${c.status}</span></td></tr>`).join("")}</tbody></table>`;
-
-  document.getElementById("notes").innerHTML = d.notes.length
-    ? d.notes.map(n => `<div class="note"><div class="d">${esc(n.id)}</div>${n.html}</div>`).join("")
-    : '<div class="empty">No notes yet.</div>';
+  const r = d.research;
+  document.getElementById("calls").innerHTML = Object.entries(r.signals).map(([k,v]) => `<div class="card"><h3>${esc(k)}</h3><p>${v.signal == null ? "Insufficient data" : ["Down","Neutral","Up"][v.signal+1]} · ${esc(v.date)}</p><p>Historical directional accuracy: ${v.directional_accuracy == null ? "–" : fmt(v.directional_accuracy*100,1)+"%"} (${v.observations} observations)</p><p>${esc(v.method)}</p></div>`).join("") + `<p>Intraday EMA: ${esc(r.intraday.reason)}</p>`;
 }
 
 // Charts live in app2.js (kept separate to keep files small).
