@@ -16,7 +16,7 @@
     }
     const W = 640, H = 255, left = 62, right = 12, top = 12, bottom = 32;
     const maps = datasets.map(series => new Map(series.points));
-    const xValues = keys.map(key => options.seasonal ? Number(key) : Date.parse(key + "T00:00:00Z"));
+    const xValues = keys.map(key => options.seasonal ? Number(key) : Date.parse(key.includes("T") ? key : key + "T00:00:00Z"));
     const start = xValues[0], end = xValues.at(-1);
     const x = i => left + (xValues[i] - start) / (end - start || 1) * (W - left - right);
     let low = Math.min(...numbers), high = Math.max(...numbers);
@@ -31,7 +31,7 @@
       svg += '<text x="' + (left - 10) + '" y="' + (y(value) + 4) + '" text-anchor="end" fill="#9ba1ad" font-size="11" font-family="Consolas,monospace">' + compact(value) + '</text>';
     }
     [...new Set([0, Math.floor((keys.length - 1) / 2), keys.length - 1])].forEach(i => {
-      const label = options.seasonal ? "Week " + keys[i] : new Date(xValues[i]).toLocaleDateString("en-US", { month: "short", year: "2-digit", timeZone: "UTC" });
+      const label = options.seasonal ? "Week " + keys[i] : options.intraday ? new Date(xValues[i]).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/New_York" }) : new Date(xValues[i]).toLocaleDateString("en-US", { month: "short", year: "2-digit", timeZone: "UTC" });
       svg += '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="' + (i === 0 ? "start" : i === keys.length - 1 ? "end" : "middle") + '" fill="#9ba1ad" font-size="11" font-family="Consolas,monospace">' + escape(label) + '</text>';
     });
     if (options.band) {
@@ -111,4 +111,5 @@
       { label: String(s.year || "Current"), points: points("current"), color: "#f1a45b" },
     ], { seasonal: true, band: true, dp: 1, title: "Current-year crude inventories versus prior five-year range" });
   };
+  window.plotMonitor = plot;
 })();

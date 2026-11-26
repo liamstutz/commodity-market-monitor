@@ -113,10 +113,11 @@ def build(record: bool = False, now: dt.datetime | None = None) -> dict:
     if SITE.exists():
         shutil.rmtree(SITE)
     shutil.copytree(ROOT / "site", SITE)
-    html = (SITE / "index.html").read_text(encoding="utf-8")
-    for asset in ("app.js", "app2.js", "style.css"):
-        html = html.replace(f'"{asset}"', f'"{asset}?v={version}"')
-    (SITE / "index.html").write_text(html, encoding="utf-8")
+    for page in SITE.glob("*.html"):
+        html = page.read_text(encoding="utf-8")
+        for asset in ("app.js", "app2.js", "style.css", "intraday.js", "intraday.css"):
+            html = html.replace(f'"{asset}"', f'"{asset}?v={version}"')
+        page.write_text(html, encoding="utf-8")
     script = (SITE / "app.js").read_text(encoding="utf-8").replace('"data.json"', f'"data.json?v={version}"')
     (SITE / "app.js").write_text(script, encoding="utf-8")
     (SITE / "data.json").write_text(serialized, encoding="utf-8")

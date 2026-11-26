@@ -6,3 +6,6 @@ __pycache__/
 node_modules/
 .env
 .venv/
+
+# Personal intraday quotes, reports and collector logs must never be published.
+.private/

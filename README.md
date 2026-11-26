@@ -42,11 +42,38 @@ Two evaluations are deliberately separate:
 
 The baseline may predate issuance because source data arrives with a delay. Results are directional observations, not executable futures P&L. There are no fills, costs, contract rolls or claims of profitability. Forecasts overlap and are correlated. First-issued values and first-observed outcomes are preserved; reruns do not rewrite them. Local previews cannot create a forward record.
 
-## Intraday EMA experiment
+## Free intraday companion
 
-The existing experimental opening-bar rule is retained and tested in `pipeline/quant.py`: 12-period EMA on five-minute bar-start timestamps, with a configurable 09:30 America/New_York anchor and next-bar-open entry candidate. Timestamps must be timezone aware; gaps, duplicates and invalid prices are rejected or skipped.
+**Cost: $0; no account or API key.** The private companion collects five-minute Yahoo Finance futures quotes for **WTI (CL=F), natural gas (NG=F) and gold (GC=F)**. It checks every five minutes while the computer is running. It does not run when the computer sleeps or is off, and does not install a startup task.
 
-**No five-minute commodity contract feed is connected.** The dashboard therefore marks this module inactive. The default anchor is a research parameter, not a universal commodity exchange opening time. No intraday signals or returns are fabricated.
+On Windows, right-click **Start-Intraday.ps1** and choose Run with PowerShell. It finds Python 3.10+, starts the collector in a hidden process and opens **http://127.0.0.1:8766/**. Re-running it opens the existing collector. Use the dashboard's **Stop local collector** button to stop it.
+
+Cross-platform, run these commands from the project folder:
+
+    python -m pip install tzdata
+    python pipeline/intraday_server.py
+
+The standalone companion needs only Python's standard library plus time-zone data on systems without an IANA database. The daily pipeline still uses requirements.txt. For a single refresh without a server, add **--once**. For cached/offline review, add **--offline**.
+
+### Collection and privacy
+
+- Initial fetch: about one month of available five-minute candles; subsequent requests cover five days and merge into a local archive capped at 30,000 bars per commodity.
+- Completed bar-start timestamps only, with a ten-second completion buffer. Null rows, zero-volume candles and live quote placeholders are excluded; wrong symbols, bad OHLC ranges, duplicates, non-finite values and regressing histories are rejected.
+- Closed observations are first-write preserved. Last fetch, latest bar end, age, unknown quote delay and failures are displayed separately. Failures retain cached data and retry on the next cycle.
+- Yahoo is an unofficial, best-effort source and may rate-limit, change or fail. Rolling symbols do not provide audited historical contract identity. Data gaps, contract changes and quote delays limit the conclusions.
+- Personal quotes, forward watches and logs stay in **.private/**, excluded from Git and never read by the public build. The server binds only to 127.0.0.1, serves a fixed file allowlist, rejects foreign hosts/origins and provides no CORS access.
+- The public **intraday.html** page explains setup and can reopen an exported report entirely in the browser. It never probes localhost automatically or uploads reports.
+- Exports contain personal research observations. Keep them private. No paid service is activated and no raw intraday quotes are redistributed through Pages.
+
+### EMA replay and forward watch
+
+The new **pipeline/intraday.py** engine runs a 12-period EMA on completed five-minute closes. It resets after a gap and each New York calendar day; twelve consecutive bars are required. At the configurable anchor (default **09:30 America/New_York**, not a universal exchange opening), close above/below EMA selects long/short. Ties are neutral.
+
+Replay enters at the **next bar's open**, exits at the open after 15, 30, 60 or 120 minutes (default 60), and excludes incomplete paths. It uses one full-size contract, subtracting editable slippage per side and a round-trip fee. Defaults of one tick per side and $5 total fee are illustrative assumptions, not a broker quote. It shows gross/net hypothetical P&L, costs, net win rate, closed-trade drawdown, an always-buy comparator on identical sessions, a chronological 70/30 split, every simulated trade and report export. The later sample is not independently out of sample if settings are tuned using it.
+
+A separate **forward watch** uses the fixed 09:30 anchor, and only records signals actually received within thirty minutes of completion when the latest bar is also no more than thirty minutes old. Its baseline is the last completed close known at observation; its target is one hour **after actual observation**, not a backdated hypothetical entry. The first subsequent close on/after the target, within thirty minutes, resolves direction. Missing outcomes are unscored and flat moves miss. Resolved entries never change. This watch has no fills or P&L and is separate from replay and the public seven-day spot forecast journal.
+
+Futures units come from CME: [WTI](https://www.cmegroup.com/education/courses/event-contracts-underlying-markets/wti-overview.html) (1,000 barrels, $0.01 tick), [natural gas](https://www.cmegroup.com/education/courses/introduction-to-natural-gas/nat-gas-product-overview) (10,000 MMBtu, $0.001 tick), [gold](https://www.cmegroup.com/markets/metals/precious/gold/specs) (100 oz, $0.10 tick). No leverage, margin, financing, tick-level fills or executable returns are claimed. [Yahoo data usage context](https://github.com/ranaroussi/yfinance#readme).
 
 ## Run and validate
 
